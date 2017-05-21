@@ -1,0 +1,26 @@
+//
+// This file uses DSON to define a superset of the JSON format.
+// The superset will support comments, single-quoted strings.
+//
+root : jsonobject;
+
+jsonobject : list {,} object
+{
+    key   : string;
+    _     : token ":";
+    value : value;
+}
+
+array : list [,] value;
+
+bool : setof symbol {true, false}
+
+value : union
+{
+    object : jsonobject;
+    array  : array;
+    number : integer; // todo: support more than just integers
+    string : string;
+    bool   : bool;
+    null   : token "null";
+}

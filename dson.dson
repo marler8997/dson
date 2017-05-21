@@ -1,0 +1,90 @@
+//
+// This file uses DSON to define the format of DSON
+//
+// Note: the '@' symbol is used when the type symbol we are wanting to
+//       reference is also a keyword used to build types, i.e.
+//         @setof, @list, @object, @union, @token
+//
+
+root : list object
+{
+    name : symbol;
+    _    : token ":";
+    type : type;
+}
+
+primitiveType : union
+{
+    symbolType       : token "symbol";
+    stringType       : token "string";
+    integer          : token "integer";
+    uinteger         : token "uinteger";
+}
+
+// Note: the order of the union fields matter, they are evaluated in
+//       the order they are defined.
+type : union
+{
+    setof   : @setof;
+    list    : @list;
+    object  : @object;
+    union   : @union;
+    nobrace : object
+    {
+        nobracetype : union
+        {
+            tokenDefinition : @token;
+            primitive       : primitiveType;
+            customTypeRef   : symbol;
+        }
+        _ : token ";";
+    }
+}
+
+setof : object
+{
+    elementType : primitiveType;
+    //values      : list {,} elementType; // Note: references the previous field 'type'
+}
+
+list : object
+{
+    //delimiterSet : optional listDelimiterSet;
+    type         : type;
+}
+
+object : list {} object
+{
+    _         : optional token "useblock";
+    name      : symbol;
+    _         : token ":";
+    modifiers : list union
+    {
+        flag: objectFieldModifierFlag;
+        delimited : object
+        {
+            _         : token "delimited";
+            delimiter : string;
+        }
+    }
+    fieldType : type;
+}
+
+objectFieldModifierFlag : setof symbol
+{
+    optional,
+    preblock,
+    postblock
+}
+
+union : list {} object
+{
+    name : symbol;
+    _    : token ":";
+    unionFieldType : type;
+}
+
+token : object
+{
+    value : string;
+}
